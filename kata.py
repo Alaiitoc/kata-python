@@ -34,6 +34,12 @@ def airport_dist(x):
     except IndexError as e:
         return None
 
+def cont_org(x):
+    try :
+        return df_airports[df_airports["iata"] == x["org_iata"]]["Continent"].iloc[0]
+    except IndexError:
+        return None
+
 
 # Get important data on current flights
 
@@ -108,9 +114,9 @@ def active_by_continent():
             print(continent.upper(), ":\n", df_airlines[df_airlines["ICAO"] == count.index[0]].iloc[0]["Name"] , ":", count.max())
 
 
-#Q3
+#Q3 
 
-def longuest_journey():
+def longuest_journey(): 
     df3 = pd.read_parquet("Flights.parquet",columns=["id","dest_iata","org_iata"])
     df3["travel_size"] = df3.apply(airport_dist, axis=1)
     print("The flight with the longuest journey started at",end=" ")
@@ -118,3 +124,14 @@ def longuest_journey():
     print("and will end at",end=" ")
     print(df_airports[df_airports["iata"] == df3.max()["dest_iata"]].iloc[0]["name"],end=" ")
     print(f'for a journey of {df3.max()["travel_size"]} km')
+
+
+
+#Q4 
+
+def average_journey():
+    df4 = pd.read_parquet("Flights.parquet",columns=["id","dest_iata","org_iata"])
+    df4["travel_size"] = df4.apply(airport_dist, axis=1)
+    print("The average route distance is :")
+    for continent in fr_api.get_zones().keys():
+        print(continent.upper(), ":\n", df4[df4["Continent"] == continent]["travel_size"].mean(), "km")
