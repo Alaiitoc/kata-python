@@ -32,3 +32,7 @@ The FlightRadarAPI project is available for you to simplify you queries to the F
 
 # Repo Explaination
 
+- CV.pdf is genrated with pandoc with ```pandoc -s -o CV.pdf CV.md```  
+- ETL.ipynb is a jupyter notebook used to test the dataset and create the files
+- kata.py is the core of this repo with all the clean code
+- result.ipynb is the jupyter notebook wich sumarise the questions and answers
