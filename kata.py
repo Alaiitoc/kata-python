@@ -137,7 +137,7 @@ def flying_models():
             dic["model_3"].append("")
             dic["number_3"].append("")
 
-        elif len(models) == 3:
+        elif len(models) >= 3:
             dic["Company registration country"].append(country)
             dic["model_1"].append(models.index[0])
             dic["number_1"].append(models[0])

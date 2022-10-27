@@ -40,6 +40,8 @@ st.title("""
 FlightRadar Kata
 """)
 
+st.subheader("Number of planes flying currently : " + str(len(pd.read_parquet("data/Flights.parquet").index)))
+
 if st.button(label="Update Live data !"):
     if update_planes() : 
         st.info("Flight list updated !")
@@ -142,3 +144,8 @@ with st.expander("Q8: By continent, what is the average active flight speed ? (f
             if not count.empty :
                 st.subheader(continent.upper())
                 st.write("Avearage speed", count.mean(), "km/h")
+
+
+st.write("[Link to the site flightRadar website](https://www.flightradar24.com/)")
+st.write("[Link to the github kata](https://gitlab.com/exalt-it-dojo/katas-python-data/-/tree/main/flightradar24)")
+st.write("[Link ot my github](https://github.com/Alaiitoc/kata-python)")
