@@ -3,14 +3,8 @@ import pandas as pd
 from geopy import distance
 
 
-fr_api = FlightRadar24API()
-
-# Airports and airlines are data that don't really change
-df_airports = pd.read_parquet("Airports.parquet")
-df_airlines = pd.read_parquet("Airlines.parquet")
-
-
 def same_continent(x):
+    df_airports = pd.read_parquet("data/Airports.parquet")
     dest = x["dest_iata"]
     org = x["org_iata"]
     try :
@@ -22,6 +16,7 @@ def same_continent(x):
         return None
 
 def airport_dist(x):
+    df_airports = pd.read_parquet("data/Airports.parquet")
     org = x["org_iata"]
     dest = x["dest_iata"]
     try :
@@ -32,144 +27,147 @@ def airport_dist(x):
         return None
 
 def cont_org(x):
+    df_airports = pd.read_parquet("data/Airports.parquet")
     try :
         return df_airports[df_airports["iata"] == x["org_iata"]]["Continent"].iloc[0]
     except IndexError:
         return None
 
+def company_country(x):
+    airline = pd.read_parquet("data/AirlineCountries.parquet", columns=["ICAO","Country"])
+    try :
+        return airline[airline["ICAO"] == x["company"]]["Country"].iloc[0]
+    except IndexError:
+        return None
 
-# Get important data on current flights
-
-def active_airplane(airline_icao):
-    flight_list=[]
-    flights = fr_api.get_flights(airline = airline_icao)
-    for flight in flights :
-        try :
-            dest_iata = flight.destination_airport_iata
-        except :
-            dest_iata = None
-        try :
-            org_iata = flight.origin_airport_iata
-        except :
-            org_iata = None
-        try :
-            model = flight.aircraft_code
-        except :
-            model = None 
-        try :
-            registration = flight.registration
-        except :
-            registration = None
-        try :
-            speed = flight.ground_speed
-        except :
-            speed = None
-
-        f = {
-            "id" : flight.id,
-            "dest_iata" : dest_iata,
-            "org_iata" : org_iata,
-            "model" : model, 
-            "registration" : registration,
-            "speed" : speed,
-            "company" : airline_icao
-            }
-        flight_list.append(f)
-    return flight_list
-
-#Update active airplanes
-active_flights = []
-for airline in df_airlines["ICAO"]: # since the API only gave 1500 flights on one request I choose to request flights by airlines
-    active_flights += active_airplane(airline)
-df_flights = pd.DataFrame(active_flights)
-df_flights = df_flights[df_flights["dest_iata"] != 'N/A'] #clean data
-df_flights = df_flights[df_flights["org_iata"] != 'N/A']
-df_flights.to_parquet("Flights.parquet")
 
 #Q1
 
 def most_active_airline():
-    count = df_flights["company"].value_counts()
+    df_airlines = pd.read_parquet("data/Airlines.parquet")
+    df_flights = pd.read_parquet("data/Flights.parquet", columns=["company"])
+
+    count = df_flights.value_counts()
     if not count.empty:
-        print(df_airlines[df_airlines["ICAO"] == count.index[0]].iloc[0]["Name"] , ":", count.max(), "planes")
+        return(df_airlines[df_airlines["ICAO"] == count.index[0][0]].iloc[0]["Name"] , count.max())
 
 #Q2
 
 def active_by_continent():
-    df= pd.read_parquet("Flights.parquet",columns=["dest_iata","org_iata","company"])
+    df= pd.read_parquet("data/Flights.parquet",columns=["dest_iata","org_iata","company"])
+
     df["Continent"] = df.apply(same_continent, axis=1)
-    for continent in fr_api.get_zones().keys():
-        count = df[df["Continent"] == continent]["company"].value_counts()
-        if not count.empty:
-            print(continent.upper(), ":\n", df_airlines[df_airlines["ICAO"] == count.index[0]].iloc[0]["Name"] , ":", count.max(), "planes")
+    return(df)
+            
 
 
 #Q3 
 
 def longuest_journey(): 
-    df3 = pd.read_parquet("Flights.parquet",columns=["id","dest_iata","org_iata"])
+    df3 = pd.read_parquet("data/Flights.parquet",columns=["id","dest_iata","org_iata"])
+
     df3["travel_size"] = df3.apply(airport_dist, axis=1)
-    print("The flight with the longuest journey started at",end=" ")
-    print(df_airports[df_airports["iata"] == df3.max()["org_iata"]].iloc[0]["name"],end=" ")
-    print("and will end at",end=" ")
-    print(df_airports[df_airports["iata"] == df3.max()["dest_iata"]].iloc[0]["name"],end=" ")
-    print(f'for a journey of {df3.max()["travel_size"]} km')
+    return df3
 
 #Q4 
 
 def average_journey():
-    df4 = pd.read_parquet("Flights.parquet",columns=["id","dest_iata","org_iata"])
+    fr_api = FlightRadar24API()
+    df4 = pd.read_parquet("data/Flights.parquet",columns=["id","dest_iata","org_iata"])
+
     df4["travel_size"] = df4.apply(airport_dist, axis=1)
     df4["org_Continent"] = df4.apply(cont_org, axis=1)
-    print("The average route distance is :")
-    for continent in fr_api.get_zones().keys():
-        print(continent.upper(), ":\n", df4[df4["org_Continent"] == continent]["travel_size"].mean(), "km")
+    return(df4)
 
 
 #Q5.1
 
-'''
-I didn't find a way to link manufacturers to models yet
-'''
+
 
 def leading_manufacturer():
-    print(df_flights["model"].value_counts().index[0], df_flights["model"].value_counts().iloc[0])
+    df_flights = pd.read_parquet("data/Flights.parquet", columns=["model"])
+    return df_flights
+    
 
 #Q5.2
 
 def continent_manufacturer():
-    df5 = pd.read_parquet("Flights.parquet",columns=["id","dest_iata","org_iata","model"])
+    df5 = pd.read_parquet("data/Flights.parquet",columns=["id","dest_iata","org_iata","model"])
+    
     df5["org_Continent"] = df5.apply(cont_org, axis=1)
-    print("The average route distance is :")
-    for continent in fr_api.get_zones().keys():
-        count = df5[df5["org_Continent"] == continent]["model"].value_counts()
-        if not count.empty:
-            print(continent.upper(), ":\n", count.index[0], count.iloc[0],"planes")
+    return df5
+
 
 #Q6
 
-'''
-I didn't find a way to link companies to countries yet
-'''
+def flying_models():
+    # Flights data
+    df6 = pd.read_parquet("data/Flights.parquet", columns=["model","company"])
+    df6["company_country"] = df6.apply(company_country,axis=1)
+    df6.dropna(inplace=True)
+    df6.reset_index(allow_duplicates=False, inplace=True)
 
+    # List of countries with active companies
+    countries = df6[["company_country"]].drop_duplicates()
+    countries.dropna(inplace=True)
+    countries = countries["company_country"].to_list()
+
+    dic = {"Company registration country":[],"model_1":[],"number_1":[],"model_2":[],"number_2":[],"model_3":[],"number_3":[]}
+
+    for country in countries:
+        models = df6[df6["company_country"] == country].value_counts("model")
+        
+        if len(models) == 0:
+            pass
+        elif len(models) == 1:
+            dic["Company registration country"].append(country)
+            dic["model_1"].append(models.index[0])
+            dic["number_1"].append(models[0])
+            dic["model_2"].append("")
+            dic["number_2"].append("")
+            dic["model_3"].append("")
+            dic["number_3"].append("")
+
+        elif len(models) == 2:
+            dic["Company registration country"].append(country)
+            dic["model_1"].append(models.index[0])
+            dic["number_1"].append(models[0])
+            dic["model_2"].append(models.index[1])
+            dic["number_2"].append(models[1])
+            dic["model_3"].append("")
+            dic["number_3"].append("")
+
+        elif len(models) == 3:
+            dic["Company registration country"].append(country)
+            dic["model_1"].append(models.index[0])
+            dic["number_1"].append(models[0])
+            dic["model_2"].append(models.index[1])
+            dic["number_2"].append(models[1])
+            dic["model_3"].append(models.index[2])
+            dic["number_3"].append(models[2])
+
+    df_answer6 = pd.DataFrame(dic)
+    df_answer6 = df_answer6.sort_values(by="Company registration country")
+    return(df_answer6)
 
 #Q7.1
 
 
 def popular_destination():
-    df4 = pd.read_parquet("Flights.parquet",columns=["id","dest_iata","org_iata"])
-    df4["travel_size"] = df4.apply(airport_dist, axis=1)
-    df4["org_Continent"] = df4.apply(cont_org, axis=1)
-    for continent in fr_api.get_zones().keys():
-        count = df4[df4["org_Continent"] == continent]["dest_iata"].value_counts()
-        if not count.empty:
-            print(continent.upper(), ":\n", "To", df_airports[df_airports["iata"] == count.index[0]].iloc[0]["name"] , ":", count.max(), "flights")
+    df_airports = pd.read_parquet("data/Airports.parquet")
+    df7 = pd.read_parquet("data/Flights.parquet",columns=["id","dest_iata","org_iata"])
+
+    df7["travel_size"] = df7.apply(airport_dist, axis=1)
+    df7["org_Continent"] = df7.apply(cont_org, axis=1)
+    return df7
+    
 
 #Q7.2
 
 def inbounds():
-    df72 = pd.read_parquet("Flights.parquet",columns=["org_iata","dest_iata"])
-    df_inbounds = pd.read_parquet("Airports.parquet",columns=["iata","Continent"])
+    df_airports = pd.read_parquet("data/Airports.parquet")
+    df72 = pd.read_parquet("data/Flights.parquet",columns=["org_iata","dest_iata"])
+    df_inbounds = pd.read_parquet("data/Airports.parquet",columns=["iata","Continent"])
     df_inbounds["inbounds"] = [0]*len(df_inbounds.index)
 
     for i in range(len(df72.index)):
@@ -181,16 +179,15 @@ def inbounds():
             pass
     
     df_inbounds["inbounds"] = df_inbounds["inbounds"].apply(lambda x: abs(x))
-    print("Greatest inbound/outbound flights difference at ", df_airports[df_airports["iata"] == df_inbounds["iata"].max()].iloc[0]["name"], end=" ")
-    print("with a différence of", df_inbounds["inbounds"].max())
+    return df_inbounds
+    
 
 
 #Q8
 
 def average_speed():
-    df8 = pd.read_parquet("Flights.parquet",columns=["org_iata","speed"])
+    fr_api = FlightRadar24API()
+    df8 = pd.read_parquet("data/Flights.parquet",columns=["org_iata","speed"])
+
     df8["org_Continent"] = df8.apply(cont_org, axis=1)
-    for continent in fr_api.get_zones().keys():
-        count = df8[df8["org_Continent"] == continent]["speed"].mean()
-        if count :
-            print(continent.upper(), ":\n", "Avearage speed", count, "km/h")
+    return df8

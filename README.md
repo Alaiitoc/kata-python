@@ -26,13 +26,13 @@ The FlightRadarAPI project is available for you to simplify you queries to the F
     - Q7.2: What airport airport has the greatest inbound/outbound flights difference ? (positive or negative)
     - Q8: By continent, what is the average active flight speed ? (flight localization by airport of origin)
 
-### Evaluation criteria
- * We love ``clean code`` 
- * Spark implementation appreciated
-
 # Repo Explaination
 
-- CV.pdf is genrated with pandoc with ```pandoc -s -o CV.pdf CV.md```  
-- ETL.ipynb is a jupyter notebook used to test the dataset and create the files
+- requirements.txt 
+- test.ipynb is a jupyter notebook used to test and understand the dataset
+- ETL.ipynb is a jupyter notebook used to clean the dataset and create the files
 - kata.py is the core of this repo with all the clean code
-- result.ipynb is the jupyter notebook wich sumarise the questions and answers
+- wikiscraping.ipynb is the notebook used to scrap the useful wikipedia page
+- Loading.py is a file used to update the data with the current flights
+- The results are in the streamlit webapp launched with: ```streamlit run Results.py```
+    - In the webapp, the questions are computed separatly and therefore it may take some time to get all the answers
