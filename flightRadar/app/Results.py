@@ -22,6 +22,8 @@ fr_api = FlightRadar24API()
 continents = fr_api.get_zones().keys()
 
 
+#                       --- PAGE CONFIG ---
+
 st.set_page_config(
     page_title="FlightRadar Kata", page_icon=":airplane:", initial_sidebar_state="expanded"
 )
@@ -45,7 +47,7 @@ st.subheader("Number of planes flying currently : " + str(len(pd.read_parquet("d
 
 #                       --- UPDATE BUTTON ---
 
-URL = "urlfromapp_consumerœp"
+URL_CONSUMER = "http://10.110.1.162:2000/"
 
 def fetch(session, url):
     try : 
@@ -56,7 +58,7 @@ def fetch(session, url):
 
 if st.button(label="Update Live data !"):
     session = requests.Session()
-    if fetch(session, URL):
+    if fetch(session, URL_CONSUMER+"/live"):
     # if update_planes() : 
         st.info("Flight list updated !")
 st.write("Last update : ", time.ctime(os.path.getmtime("data/Flights.parquet")))

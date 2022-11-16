@@ -10001,3 +10001,9 @@ flightRadar/__pycache__/producer.cpython-38.pyc
 flightRadar/pyspark/kata-spark.py
 flightRadar/pyspark/test.ipynb
 flightRadar/__pycache__/Loading.cpython-38.pyc
+flightRadar/consumer/__pycache__/consumer.cpython-38.pyc
+flightRadar/consumer/test.parquet
+flightRadar/kafka/test.parquet
+flightRadar/producer/__pycache__/__init__.cpython-38.pyc
+flightRadar/producer/__pycache__/Loading.cpython-38.pyc
+flightRadar/producer/__pycache__/producer.cpython-38.pyc

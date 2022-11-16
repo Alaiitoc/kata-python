@@ -1,0 +1,6 @@
+flask==2.0.1
+pandas==1.5.1
+requests==2.22.0
+confluent_kafka==1.9.2
+flightradar24==0.3.1
+FlightRadarAPI==1.2.1

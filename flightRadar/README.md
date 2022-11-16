@@ -32,6 +32,7 @@ The FlightRadarAPI project is available for you to simplify you queries to the F
 
 The kafka cluster works well in the dockers and it is possible to interact with it through the jupyter notebooks.
 Next steps :  
+- [x] Connect Conumer and producer app
 - [] Dockerising consumer and producer app  
 - [] connect the differents dockers   
 - [] connect the streamlit docker with the others  
@@ -43,7 +44,7 @@ V2 :
 - rewrite everything in a live table format (Delta Table/ Apache Iceberg)
 
 
-## app 
+## app 
 
 Folder with the original solution in a dockerised streamlit app :
 

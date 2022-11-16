@@ -1,33 +1,50 @@
-from flask import Flask, request
-from consumer.consumer import *
-import producer.Loading as loading
+from flask import Flask, flash, request
 import pandas as pd
 import time
 import os
+import requests
+
+from confluent_kafka import Consumer
 
 
-appFlask = Flask(__name__)
-consumer_auto = Consumer("auto_topic")
-consumer_live = Consumer("live_topic")
+appFlask = Flask("Consumer_app")
+appFlask.secret_key = b'nqLyLEBL2QKciWYZvAcAuawKx_dsRzQGaTA7zn66QZQ'
 
+URL_CONSUMER = "http://10.110.1.162:1129"
+
+consumer_config = {
+    'bootstrap.servers': "localhost:9092",
+    'group.id': 'consumer-1',
+    'auto.offset.reset': 'largest',
+    'enable.auto.commit': 'false',
+    'max.poll.interval.ms': '86400000'
+}
+
+@appFlask.route("/")
+def index():
+    return ("Consumer API :\
+         /autoUpdate\
+         and /live")
 
 @appFlask.route("/autoUpdate", methods=['GET'])
-def index():
+def auto():
     if request.method == 'GET' : 
         Hourly_messages = []
+        consumer = Consumer(consumer_config)
+        consumer.subscribe(["auto_topic"])
         try:
             while len(Hourly_messages) < 4: # 4 messages by hour
                 # read single message at a time
-                msg = consumer_auto.poll(0)
+                msg = consumer.poll(0)
                 if msg is None:
-                    sleep(2)
+                    time.sleep(2)
                     continue
                 if msg.error():
                     print("Error reading message : {}".format(msg.error()))
                     continue
                 msg.value().append(Hourly_messages)
-                consumer_auto.commit()
-            consumer_auto.close()
+                consumer.commit()
+            consumer.close()
 
             # Data cleaning of hourly_messages here
             df0 = pd.read_parquet(Hourly_messages[0])
@@ -45,33 +62,43 @@ def index():
         
 
 
-@appFlask.route("/update", methods=['GET'])
+@appFlask.route("/live", methods=['GET'])
 def live():
     if request.method == 'GET' :
-        last_updated = time.ctime(os.path.getmtime("data/Flights.parquet")) #change path to data
+        last_updated = os.path.getmtime("../data/Flights.parquet") # WARNING data path
         if time.time()-last_updated < 5*60 : # 5 minutes
-            pass
+            print("Already up to date")
+            return("Already up to date")
         else :
-            request.get() # send request to live update in app_producer
+            requests.get(URL_CONSUMER+"/live") # send request to live update in app_producer
+            consumer = Consumer(consumer_config)
+            consumer.subscribe(["live_topic"])
             try:
+                msg = None
                 while msg == None: 
                     # read single message at a time
-                    msg = consumer_live.poll(0)
+                    print("Listening")
+                    msg = consumer.poll(0)
                     if msg is None:
-                        sleep(2)
+                        time.sleep(10)
                         continue
                     if msg.error():
                         print("Error reading message : {}".format(msg.error()))
                         continue
                     message = msg.value()
-                    consumer_live.commit()
-                consumer_live.close()
-                with open("Flights.parquet", 'w') as file:
+                    consumer.commit()
+                consumer.close()
+                with open("../data/Flights.parquet", 'wb') as file:
                     file.write(message)
+                print("File updated")
+                flash("Success !","success")
+                return (f'Updated : {time.time()}')
                 
             except Exception as ex:
-                    print(ex)
-
+                print(ex)
+                flash("Error","error")
+                return str(ex)
+    return ("Live update")
 
 if __name__ == "__main__":
-    appFlask.run(debug = True, host = "0.0.0.0")
+    appFlask.run(debug = True, host = "0.0.0.0", port=2000)

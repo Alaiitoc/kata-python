@@ -1,38 +1,41 @@
 from flask import Flask
-from producer.producer import *
-import producer.Loading as loading
-import time
+from producer import AutoProducer
+import Loading as loading
+import pandas as pd
+from time import time, ctime
 
-
-appFlask = Flask(__name__)
+appFlask = Flask("Producer_app")
 auto_producer = AutoProducer("auto_topic")
-current_producer = AutoProducer("live_topic")
+live_producer = AutoProducer("live_topic")
 
+@appFlask.route("/")
+def index():
+    return ("Producer API :\
+         /autoUpdate\
+         and /live")
 
 @appFlask.route("/autoUpdate")
-def index():
+def auto():
     #SENDING DATA TO KAFKA TOPIC
     while True :
         try :
             data = loading.planes()
             auto_producer.send_msg_async(data)
-            return time.time()
-        except :
-            return 'Failed'
+            return (f'Updated : {ctime(time())}')
+        except Exception as ex :
+            return ('Failed', ex)
 
 
-@appFlask.route("/update")
-def update():
+@appFlask.route("/live")
+def live():
     #SENDING DATA TO KAFKA TOPIC
-    while True :
-        try :
-            data = loading.planes()
-            message = data
-            current_producer.send_msg_async(message)
-            return time.time()
-        except :
-            return 'Failed'
+    try :
+        data = loading.planes()
+        live_producer.send_msg_async(data)
+        return (f'Updated : {ctime(time())}')
+    except Exception as ex :
+        return ('Failed : ',ex)
 
 
 if __name__ == "__main__":
-    appFlask.run(debug = True, host = "0.0.0.0")
+    appFlask.run(debug = True, host = "0.0.0.0", port=1129)
