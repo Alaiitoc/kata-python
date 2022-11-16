@@ -28,6 +28,25 @@ The FlightRadarAPI project is available for you to simplify you queries to the F
 
 # Repo Explaination
 
+## TODO
+
+The kafka cluster works well in the dockers and it is possible to interact with it through the jupyter notebooks.
+Next steps :  
+- [] Dockerising consumer and producer app  
+- [] connect the differents dockers   
+- [] connect the streamlit docker with the others  
+- [] put the data in docker volumes  
+- [] actually use the data for the app  
+- [] implement the back in pyspsark  
+
+V2 :
+- rewrite everything in a live table format (Delta Table/ Apache Iceberg)
+
+
+## app 
+
+Folder with the original solution in a dockerised streamlit app :
+
 - requirements.txt 
 - test.ipynb is a jupyter notebook used to test and understand the dataset
 - ETL.ipynb is a jupyter notebook used to clean the dataset and create the files
@@ -36,3 +55,24 @@ The FlightRadarAPI project is available for you to simplify you queries to the F
 - Loading.py is a file used to update the data with the current flights
 - The results are in the streamlit webapp launched with: ```streamlit run Results.py```
     - In the webapp, the questions are computed separatly and therefore it may take some time to get all the answers
+
+## data
+
+Folder with the different data files in parquet.
+
+## kafka
+
+Folder with the dockercompose file required to launch a kafka instance.
+This folder also contains jupyter notebooks with python producer and consumer that can interact with the kafka cluster.
+
+## producer 
+
+Folder with the files to launch the Kafka producer API.
+
+## consumer 
+
+Folder with the files to launch the Kafka consumer API.
+
+## pyspark
+
+second version of the kata but wirh a spypsark implementation this time. (To be finished)

@@ -2,11 +2,12 @@ import os
 import time
 import streamlit as st
 import pandas as pd
+import requests
 
 from FlightRadar24.api import FlightRadar24API
 from kata import most_active_airline, active_by_continent, longuest_journey, average_journey,\
     leading_manufacturer, continent_manufacturer, flying_models, popular_destination, inbounds, average_speed
-from Loading import update_planes
+from producer.Loading import update_planes
 
 
 #caching results
@@ -42,8 +43,21 @@ FlightRadar Kata
 
 st.subheader("Number of planes flying currently : " + str(len(pd.read_parquet("data/Flights.parquet").index)))
 
+#                       --- UPDATE BUTTON ---
+
+URL = "urlfromapp_consumerœp"
+
+def fetch(session, url):
+    try : 
+        result = session.get(url)
+    except Exception:
+        return {}
+
+
 if st.button(label="Update Live data !"):
-    if update_planes() : 
+    session = requests.Session()
+    if fetch(session, URL):
+    # if update_planes() : 
         st.info("Flight list updated !")
 st.write("Last update : ", time.ctime(os.path.getmtime("data/Flights.parquet")))
 st.write("This operation may take a few minutes")
@@ -51,6 +65,8 @@ st.write("This operation may take a few minutes")
 st.header("""
 Questions :
 """)
+
+#                           --- QUESTIONS ---
 
 
 with st.expander("Q1 : What is the company with the most active flights in the world ?"):

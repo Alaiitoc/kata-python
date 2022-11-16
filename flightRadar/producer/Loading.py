@@ -54,3 +54,14 @@ def update_planes():
 
     df_flights.to_parquet("data/Flights.parquet")
     return True
+
+def planes():
+    df_airlines = pd.read_parquet("data/Airlines.parquet")
+    active_flights = []
+    for airline in df_airlines["ICAO"]: # since the API only gave 1500 flights on one request I choose to request flights by airlines
+        active_flights += active_airplane(airline)
+    df_flights = pd.DataFrame(active_flights)
+    df_flights = df_flights[df_flights["dest_iata"] != 'N/A'] #clean data
+    df_flights = df_flights[df_flights["org_iata"] != 'N/A']
+
+    return df_flights.to_parquet()

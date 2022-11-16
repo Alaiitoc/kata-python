@@ -9996,3 +9996,8 @@ flightRadar/testvenv/lib/python3.9/site-packages/tzdata-2022.6.dist-info/top_lev
 flightRadar/testvenv/lib/python3.9/site-packages/tzdata-2022.6.dist-info/WHEEL
 flightRadar/__pycache__/kata.cpython-39.pyc
 flightRadar/__pycache__/Loading.cpython-39.pyc
+flightRadar/__pycache__/Loading.cpython-38.pyc
+flightRadar/__pycache__/producer.cpython-38.pyc
+flightRadar/pyspark/kata-spark.py
+flightRadar/pyspark/test.ipynb
+flightRadar/__pycache__/Loading.cpython-38.pyc
