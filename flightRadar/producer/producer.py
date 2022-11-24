@@ -1,7 +1,7 @@
 from confluent_kafka import Producer
 
 class AutoProducer():
-    broker = "localhost:9092"
+    broker = "kafka1:19092"
     producer = None
 
     def __init__(self, topic):

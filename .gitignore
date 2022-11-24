@@ -10007,3 +10007,4 @@ flightRadar/kafka/test.parquet
 flightRadar/producer/__pycache__/__init__.cpython-38.pyc
 flightRadar/producer/__pycache__/Loading.cpython-38.pyc
 flightRadar/producer/__pycache__/producer.cpython-38.pyc
+flightRadar/pyspark/training tech axa/exercices.ipynb

@@ -1,7 +1,7 @@
 from flask import Flask
 from producer import AutoProducer
 import Loading as loading
-import pandas as pd
+import os
 from time import time, ctime
 
 appFlask = Flask("Producer_app")
@@ -37,5 +37,16 @@ def live():
         return ('Failed : ',ex)
 
 
+@appFlask.route("/test")
+def test():
+    #SENDING DATA TO KAFKA TOPIC
+    try :
+        data = "message"
+        live_producer.send_msg_async(data)
+        return (f'Updated : {ctime(time())}')
+    except Exception as ex :
+        return ('Failed : ',ex)
+
+
 if __name__ == "__main__":
-    appFlask.run(debug = True, host = "0.0.0.0", port=1129)
+    appFlask.run(debug = True, host = "0.0.0.0", port= os.getenv('PORT',1129))

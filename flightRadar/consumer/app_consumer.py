@@ -8,12 +8,12 @@ from confluent_kafka import Consumer
 
 
 appFlask = Flask("Consumer_app")
-appFlask.secret_key = b'nqLyLEBL2QKciWYZvAcAuawKx_dsRzQGaTA7zn66QZQ'
+appFlask.secret_key = b'nqLyLEBL2QKciWYZvAcAuawKx_dsRzQGaTA7zn66QZQ' #
 
-URL_CONSUMER = "http://10.110.1.162:1129"
+URL_PRODUCER = "http://producer1:1129"
 
 consumer_config = {
-    'bootstrap.servers': "localhost:9092",
+    'bootstrap.servers': "kafka1:19092",
     'group.id': 'consumer-1',
     'auto.offset.reset': 'largest',
     'enable.auto.commit': 'false',
@@ -70,7 +70,7 @@ def live():
             print("Already up to date")
             return("Already up to date")
         else :
-            requests.get(URL_CONSUMER+"/live") # send request to live update in app_producer
+            requests.get(URL_PRODUCER+"/live") # send request to live update in app_producer
             consumer = Consumer(consumer_config)
             consumer.subscribe(["live_topic"])
             try:
@@ -99,6 +99,33 @@ def live():
                 flash("Error","error")
                 return str(ex)
     return ("Live update")
+
+@appFlask.route("/test")
+def test():
+    requests.get(URL_PRODUCER+"/test")
+    consumer = Consumer(consumer_config)
+    consumer.subscribe(["live_topic"])
+    try:
+        msg = None
+        while msg == None: 
+            # read single message at a time
+            print("Listening")
+            msg = consumer.poll(0)
+            if msg is None:
+                time.sleep(10)
+                continue
+            if msg.error():
+                print("Error reading message : {}".format(msg.error()))
+                continue
+            message = msg.value()
+            consumer.commit()
+        consumer.close()
+        return (f'Updated : {message} {time.time()}')
+
+    except Exception as ex:
+        print(ex)
+        flash("Error","error")
+        return str(ex)
 
 if __name__ == "__main__":
     appFlask.run(debug = True, host = "0.0.0.0", port=2000)
