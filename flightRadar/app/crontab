@@ -1,0 +1,2 @@
+0 * * * * http://producer1/autoUpdate
+5 0 * * * http://consumer1/autoUpdate

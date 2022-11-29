@@ -35,10 +35,12 @@ Next steps :
 - [x] Connect Conumer and producer app
 - [x] Dockerising consumer and producer app  
 - [x] connect the differents dockers   
-- [] connect the streamlit docker with the others  
-- [] put the data in docker volumes  
+- [x] Add shared volume
+- [x] connect the streamlit docker with the others  
+- [] Crontab
 - [] actually use the data for the app  
 - [] implement the back in pyspsark  
+- [] finish doc
 
 V2 :
 - rewrite everything in a live table format (Delta Table/ Apache Iceberg)

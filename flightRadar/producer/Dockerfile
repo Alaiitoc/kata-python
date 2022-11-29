@@ -8,4 +8,4 @@ COPY . ./producer
 
 RUN pip install -r producer/requirements.txt
 
-CMD ["python", "producer/app_producer.py"]
+CMD ["python3", "producer/app_producer.py"]

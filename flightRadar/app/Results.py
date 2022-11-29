@@ -7,7 +7,6 @@ import requests
 from FlightRadar24.api import FlightRadar24API
 from kata import most_active_airline, active_by_continent, longuest_journey, average_journey,\
     leading_manufacturer, continent_manufacturer, flying_models, popular_destination, inbounds, average_speed
-from producer.Loading import update_planes
 
 
 #caching results
@@ -47,21 +46,21 @@ st.subheader("Number of planes flying currently : " + str(len(pd.read_parquet("d
 
 #                       --- UPDATE BUTTON ---
 
-URL_CONSUMER = "http://10.110.1.162:2000/"
+URL_CONSUMER = "http://consumer1:2000"
 
 def fetch(session, url):
     try : 
         result = session.get(url)
+        return result.json()
     except Exception:
         return {}
 
 
 if st.button(label="Update Live data !"):
     session = requests.Session()
-    if fetch(session, URL_CONSUMER+"/live"):
-    # if update_planes() : 
-        st.info("Flight list updated !")
-st.write("Last update : ", time.ctime(os.path.getmtime("data/Flights.parquet")))
+    data =  fetch(session, URL_CONSUMER+"/live")
+    st.json(data)
+st.write("Last update : ", time.ctime(os.path.getmtime("/data/Flights.parquet")))
 st.write("This operation may take a few minutes")
 
 st.header("""

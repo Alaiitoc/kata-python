@@ -34,6 +34,7 @@ def live():
         live_producer.send_msg_async(data)
         return (f'Updated : {ctime(time())}')
     except Exception as ex :
+        print(ex)
         return ('Failed : ',ex)
 
 

@@ -4,7 +4,7 @@ from geopy import distance
 
 
 def same_continent(x):
-    df_airports = pd.read_parquet("data/Airports.parquet")
+    df_airports = pd.read_parquet("/data/Airports.parquet")
     dest = x["dest_iata"]
     org = x["org_iata"]
     try :
@@ -16,7 +16,7 @@ def same_continent(x):
         return None
 
 def airport_dist(x):
-    df_airports = pd.read_parquet("data/Airports.parquet")
+    df_airports = pd.read_parquet("/data/Airports.parquet")
     org = x["org_iata"]
     dest = x["dest_iata"]
     try :
@@ -27,14 +27,14 @@ def airport_dist(x):
         return None
 
 def cont_org(x):
-    df_airports = pd.read_parquet("data/Airports.parquet")
+    df_airports = pd.read_parquet("/data/Airports.parquet")
     try :
         return df_airports[df_airports["iata"] == x["org_iata"]]["Continent"].iloc[0]
     except IndexError:
         return None
 
 def company_country(x):
-    airline = pd.read_parquet("data/AirlineCountries.parquet", columns=["ICAO","Country"])
+    airline = pd.read_parquet("/data/AirlineCountries.parquet", columns=["ICAO","Country"])
     try :
         return airline[airline["ICAO"] == x["company"]]["Country"].iloc[0]
     except IndexError:
@@ -44,8 +44,8 @@ def company_country(x):
 #Q1
 
 def most_active_airline():
-    df_airlines = pd.read_parquet("data/Airlines.parquet")
-    df_flights = pd.read_parquet("data/Flights.parquet", columns=["company"])
+    df_airlines = pd.read_parquet("/data/Airlines.parquet")
+    df_flights = pd.read_parquet("/data/live/Flights.parquet", columns=["company"])
 
     count = df_flights.value_counts()
     if not count.empty:
@@ -54,7 +54,7 @@ def most_active_airline():
 #Q2
 
 def active_by_continent():
-    df= pd.read_parquet("data/Flights.parquet",columns=["dest_iata","org_iata","company"])
+    df= pd.read_parquet("/data/live/Flights.parquet",columns=["dest_iata","org_iata","company"])
 
     df["Continent"] = df.apply(same_continent, axis=1)
     return(df)
@@ -64,7 +64,7 @@ def active_by_continent():
 #Q3 
 
 def longuest_journey(): 
-    df3 = pd.read_parquet("data/Flights.parquet",columns=["id","dest_iata","org_iata"])
+    df3 = pd.read_parquet("/data/live/Flights.parquet",columns=["id","dest_iata","org_iata"])
 
     df3["travel_size"] = df3.apply(airport_dist, axis=1)
     return df3
@@ -73,7 +73,7 @@ def longuest_journey():
 
 def average_journey():
     fr_api = FlightRadar24API()
-    df4 = pd.read_parquet("data/Flights.parquet",columns=["id","dest_iata","org_iata"])
+    df4 = pd.read_parquet("/data/live/Flights.parquet",columns=["id","dest_iata","org_iata"])
 
     df4["travel_size"] = df4.apply(airport_dist, axis=1)
     df4["org_Continent"] = df4.apply(cont_org, axis=1)
@@ -85,14 +85,14 @@ def average_journey():
 
 
 def leading_manufacturer():
-    df_flights = pd.read_parquet("data/Flights.parquet", columns=["model"])
+    df_flights = pd.read_parquet("/data/live/Flights.parquet", columns=["model"])
     return df_flights
     
 
 #Q5.2
 
 def continent_manufacturer():
-    df5 = pd.read_parquet("data/Flights.parquet",columns=["id","dest_iata","org_iata","model"])
+    df5 = pd.read_parquet("/data/live/Flights.parquet",columns=["id","dest_iata","org_iata","model"])
     
     df5["org_Continent"] = df5.apply(cont_org, axis=1)
     return df5
@@ -102,7 +102,7 @@ def continent_manufacturer():
 
 def flying_models():
     # Flights data
-    df6 = pd.read_parquet("data/Flights.parquet", columns=["model","company"])
+    df6 = pd.read_parquet("/data/live/Flights.parquet", columns=["model","company"])
     df6["company_country"] = df6.apply(company_country,axis=1)
     df6.dropna(inplace=True)
     df6.reset_index(allow_duplicates=False, inplace=True)
@@ -155,7 +155,7 @@ def flying_models():
 
 def popular_destination():
     df_airports = pd.read_parquet("data/Airports.parquet")
-    df7 = pd.read_parquet("data/Flights.parquet",columns=["id","dest_iata","org_iata"])
+    df7 = pd.read_parquet("/data/live/Flights.parquet",columns=["id","dest_iata","org_iata"])
 
     df7["travel_size"] = df7.apply(airport_dist, axis=1)
     df7["org_Continent"] = df7.apply(cont_org, axis=1)
@@ -166,7 +166,7 @@ def popular_destination():
 
 def inbounds():
     df_airports = pd.read_parquet("data/Airports.parquet")
-    df72 = pd.read_parquet("data/Flights.parquet",columns=["org_iata","dest_iata"])
+    df72 = pd.read_parquet("/data/live/Flights.parquet",columns=["org_iata","dest_iata"])
     df_inbounds = pd.read_parquet("data/Airports.parquet",columns=["iata","Continent"])
     df_inbounds["inbounds"] = [0]*len(df_inbounds.index)
 
@@ -187,7 +187,7 @@ def inbounds():
 
 def average_speed():
     fr_api = FlightRadar24API()
-    df8 = pd.read_parquet("data/Flights.parquet",columns=["org_iata","speed"])
+    df8 = pd.read_parquet("/data/live/Flights.parquet",columns=["org_iata","speed"])
 
     df8["org_Continent"] = df8.apply(cont_org, axis=1)
     return df8

@@ -1,6 +1,7 @@
 from flask import Flask, flash, request
 import pandas as pd
 import time
+from datetime import date, timedelta
 import os
 import requests
 
@@ -33,7 +34,7 @@ def auto():
         consumer = Consumer(consumer_config)
         consumer.subscribe(["auto_topic"])
         try:
-            while len(Hourly_messages) < 4: # 4 messages by hour
+            while len(Hourly_messages) < 24: # 24 messages a day
                 # read single message at a time
                 msg = consumer.poll(0)
                 if msg is None:
@@ -45,17 +46,20 @@ def auto():
                 msg.value().append(Hourly_messages)
                 consumer.commit()
             consumer.close()
+            yesterday = str(date.today() - timedelta(day=1)).replace("-","")
 
             # Data cleaning of hourly_messages here
-            df0 = pd.read_parquet(Hourly_messages[0])
-            df1 = pd.read_parquet(Hourly_messages[1])
-            df2 = pd.read_parquet(Hourly_messages[2])
-            df3 = pd.read_parquet(Hourly_messages[3])
+            for hour in range(len(Hourly_messages)) :
+                df = pd.read_parquet(Hourly_messages[hour])
+                df['Hour'] = [hour]*len(df.index)
+                df.dropna()
+                df.to_parquet(f"/data/{yesterday}/Flights_{yesterday}_{hour}.parquet")
 
-            df_hourly = pd.concat([df0,df1,df2,df3], ignore_index=True)
-
+            #Daily stats
+            df_hourly = pd.read_parquet(f"/data/{yesterday}/")
             df_hourly.drop_duplicates(["dest_iata","org_iata"]) 
-            # I'll need to think about this a bit more in order to have stats that make sense but for now it's a start
+            df_hourly.to_parquet(f"/data/{yesterday}/Flights_{yesterday}")
+            
 
         except Exception as ex:
                 print("Kafka Exception : {}", ex)
@@ -65,7 +69,7 @@ def auto():
 @appFlask.route("/live", methods=['GET'])
 def live():
     if request.method == 'GET' :
-        last_updated = os.path.getmtime("../data/Flights.parquet") # WARNING data path
+        last_updated = os.path.getmtime("/data/Flights.parquet") 
         if time.time()-last_updated < 5*60 : # 5 minutes
             print("Already up to date")
             return("Already up to date")
@@ -88,11 +92,11 @@ def live():
                     message = msg.value()
                     consumer.commit()
                 consumer.close()
-                with open("../data/Flights.parquet", 'wb') as file:
+                with open("/data/live/Flights.parquet", 'wb') as file:
                     file.write(message)
                 print("File updated")
                 flash("Success !","success")
-                return (f'Updated : {time.time()}')
+                return (f'Updated : {time.ctime()}')
                 
             except Exception as ex:
                 print(ex)
@@ -120,12 +124,12 @@ def test():
             message = msg.value()
             consumer.commit()
         consumer.close()
-        return (f'Updated : {message} {time.time()}')
+        return (f'Updated : {message} {time.ctime()}')
 
     except Exception as ex:
         print(ex)
         flash("Error","error")
         return str(ex)
-
+  
 if __name__ == "__main__":
     appFlask.run(debug = True, host = "0.0.0.0", port=2000)
