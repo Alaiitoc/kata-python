@@ -23,6 +23,7 @@ continents = fr_api.get_zones().keys()
 
 #                       --- PAGE CONFIG ---
 
+
 st.set_page_config(
     page_title="FlightRadar Kata", page_icon=":airplane:", initial_sidebar_state="expanded"
 )
@@ -44,7 +45,9 @@ FlightRadar Kata
 
 st.subheader("Number of planes flying currently : " + str(len(pd.read_parquet("data/Flights.parquet").index)))
 
+
 #                       --- UPDATE BUTTON ---
+
 
 URL_CONSUMER = "http://consumer1:2000"
 
@@ -56,7 +59,7 @@ def fetch(session, url):
         return {}
 
 
-if st.button(label="Update Live data !"):
+if st.button(label="Update Live data !"): # UPDATE LIVE DATA
     session = requests.Session()
     data =  fetch(session, URL_CONSUMER+"/live")
     st.json(data)
@@ -66,6 +69,7 @@ st.write("This operation may take a few minutes")
 st.header("""
 Questions :
 """)
+
 
 #                           --- QUESTIONS ---
 
@@ -134,8 +138,7 @@ with st.expander("Q6: By company registration country, what are the tops 3 airpl
                 st.write(df_6["model_1"].iloc[country], " : ", df_6["number_1"].iloc[country])
                 if df_6["model_2"].iloc[country] : st.write(df_6["model_2"].iloc[country], " : ", df_6["number_2"].iloc[country])
                 if df_6["model_3"].iloc[country] : st.write(df_6["model_3"].iloc[country], " : ", df_6["number_3"].iloc[country])
-
-            
+          
 
 with st.expander("Q7.1: By continent, what airport is the most popular destination ?"):
     if st.checkbox("Answer Q7.1",key="7.1"):
@@ -152,6 +155,7 @@ with st.expander("Q7.2: What airport airport has the greatest inbound/outbound f
         df_72 = kata(inbounds)
         st.write("Greatest inbound/outbound flights difference at ", df_airports[df_airports["iata"] == df_72["iata"].max()].iloc[0]["name"], \
                 "with a difference of", df_72["inbounds"].max())
+
 
 with st.expander("Q8: By continent, what is the average active flight speed ? (flight localization by airport of origin)"):
     if st.checkbox("Answer Q8",key="8"):

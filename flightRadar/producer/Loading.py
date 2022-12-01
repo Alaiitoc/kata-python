@@ -1,7 +1,7 @@
 from FlightRadar24.api import FlightRadar24API
 import pandas as pd
 
-# Get important data on current flights
+#                       ---  Get important data on current flights  ---                     #
 
 def active_airplane(airline_icao):
     fr_api = FlightRadar24API()
@@ -38,33 +38,21 @@ def active_airplane(airline_icao):
             "speed" : speed,
             "company" : airline_icao
             }
+
         flight_list.append(f)
     return flight_list
 
-#Update active airplanes
-
-def update_planes():
-    df_airlines = pd.read_parquet("/data/Airlines.parquet")
-    active_flights = []
-    for airline in df_airlines["ICAO"]: # since the API only gave 1500 flights on one request I choose to request flights by airlines
-        active_flights += active_airplane(airline)
-    df_flights = pd.DataFrame(active_flights)
-    df_flights = df_flights[df_flights["dest_iata"] != 'N/A'] #clean data
-    df_flights = df_flights[df_flights["org_iata"] != 'N/A']
-
-    df_flights.to_parquet("/data/Flights.parquet")
-    return True
+#                       ---  Update active airplanes  ---                       #
 
 def planes():
     df_airlines = pd.read_parquet("/data/Airlines.parquet")
+    
+    #since the API only gave 1500 flights on one request I choose to request flights by airlines
     active_flights = []
-    counter = 0
-    for airline in df_airlines["ICAO"]: # since the API only gave 1500 flights on one request I choose to request flights by airlines
-        if counter % 100 == 0 : print(f'{counter}/{len(df_airlines.index)}')
-        counter +=1
+    for airline in df_airlines["ICAO"]:
         active_flights += active_airplane(airline)
+    
     df_flights = pd.DataFrame(active_flights)
-    df_flights = df_flights[df_flights["dest_iata"] != 'N/A'] #clean data
-    df_flights = df_flights[df_flights["org_iata"] != 'N/A']
+    df_flights = df_flights[(df_flights["dest_iata"] != 'N/A') & (df_flights["org_iata"] != 'N/A')] #clean data
 
     return df_flights.to_parquet()

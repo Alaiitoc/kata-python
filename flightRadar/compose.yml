@@ -75,10 +75,10 @@ services:
     volumes:
       - ./data:/data
     
-  # cron :
-  #   image : streamlit-flight
-  #   entrypoint : /bin/bash
-  #   command : ["cron", "-f"]
+  cron :
+    image : streamlit-flight
+    entrypoint : /bin/bash
+    command : ["cron", "-f"]
 
 
     

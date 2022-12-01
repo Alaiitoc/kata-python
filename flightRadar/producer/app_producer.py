@@ -37,17 +37,5 @@ def live():
         print(ex)
         return ('Failed : ',ex)
 
-
-@appFlask.route("/test")
-def test():
-    #SENDING DATA TO KAFKA TOPIC
-    try :
-        data = "message"
-        live_producer.send_msg_async(data)
-        return (f'Updated : {ctime(time())}')
-    except Exception as ex :
-        return ('Failed : ',ex)
-
-
 if __name__ == "__main__":
     appFlask.run(debug = True, host = "0.0.0.0", port= os.getenv('PORT',1129))

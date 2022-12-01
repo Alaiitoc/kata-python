@@ -103,33 +103,6 @@ def live():
                 flash("Error","error")
                 return str(ex)
     return ("Live update")
-
-@appFlask.route("/test")
-def test():
-    requests.get(URL_PRODUCER+"/test")
-    consumer = Consumer(consumer_config)
-    consumer.subscribe(["live_topic"])
-    try:
-        msg = None
-        while msg == None: 
-            # read single message at a time
-            print("Listening")
-            msg = consumer.poll(0)
-            if msg is None:
-                time.sleep(10)
-                continue
-            if msg.error():
-                print("Error reading message : {}".format(msg.error()))
-                continue
-            message = msg.value()
-            consumer.commit()
-        consumer.close()
-        return (f'Updated : {message} {time.ctime()}')
-
-    except Exception as ex:
-        print(ex)
-        flash("Error","error")
-        return str(ex)
   
 if __name__ == "__main__":
     appFlask.run(debug = True, host = "0.0.0.0", port=2000)
