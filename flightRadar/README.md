@@ -78,4 +78,4 @@ Folder with the files to launch the Kafka consumer API.
 
 ## pyspark
 
-second version of the kata but wirh a spypsark implementation this time. (To be finished)
+Working on a second version of the kata but wirh a Pyspark implementation this time. (To be finished)
