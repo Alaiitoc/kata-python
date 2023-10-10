@@ -32,7 +32,7 @@ The FlightRadarAPI project is available for you to simplify you queries to the F
 
 The kafka cluster works well in the dockers and it is possible to interact with it through the jupyter notebooks.
 Next steps :  
-- [x] Connect Conumer and producer app
+- [x] Connect Consumer and producer app
 - [x] Dockerising consumer and producer app  
 - [x] connect the differents dockers   
 - [x] Add shared volume
